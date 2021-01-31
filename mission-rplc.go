@@ -13,10 +13,32 @@ type ss_Component struct {
   location_x int
   location_y int
 }
+func (node *ss_Component) cmd_info() {
+  fmt.Println("Device ID:",node.ss_id)
+  fmt.Println("     Name:",node.name)
+}
+
+
+
+
+
+
 
 
 func main() {
+
+var (
+    home_base_node	*ss_Component
+   remote_chain         []*ss_Component
+   user_command		string
+)
+
+
+
+
   fmt.Println("Welcome to Mission RPLC.\nCopyright (c) 2021 by Katin Imes under the GPL 2.0 License.\n")
+
+
 
   network := []*ss_Component {
 	{"41011","SX81 Camera","910-770423","lab1-north","motion-detected",15,1},
@@ -62,16 +84,80 @@ func main() {
 	{"41042","D9 Door Controller","910-770423","Lab1","auto",3,13},
 	{"41042","D9 Door Controller","910-770423","Lab2","auto",3,16},
 	
-}
+    }
 
 
   mission_instructions()
 
-	for idx, val := range network {
-		fmt.Println(idx,val.name, val.devicetype)
-	}
+//  for idx, val := range network {
+//    fmt.Println(idx,val.name, val.devicetype)
+//  }
+
+  home_base_node = get_node_by_name("lobby-main",network)
+  remote_chain = append(remote_chain,home_base_node)
+
+//  fmt.Println( home_base_node )
 
 
+// main game loop
+  for {
+    print_prompt( home_base_node, remote_chain )
+    fmt.Scanln(&user_command)
+    process_cmd(remote_chain,user_command)
+
+
+
+  }
+
+
+
+}
+
+/////////////////////////////////////////////////
+// functions
+/////////////////////////////////////////////////
+
+func print_prompt( home_base_node *ss_Component, remote_chain []*ss_Component ) {
+  fmt.Print( home_base_node.name + ">" )
+
+}
+
+
+func display_error( msg string ) {
+  fmt.Println( msg )
+}
+
+
+func get_node_by_name( name string, network []*ss_Component ) *ss_Component {
+
+fmt.Println("looking for:",name)
+
+  for idx, val := range network {
+    if val.name == name { 
+//      fmt.Println("FOUND IT",idx)
+      return network[idx] 
+    } 
+//fmt.Println(idx,val.name, val.devicetype)
+  }
+  display_error( "node name "+name+" not found in network." )
+  return nil
+}
+
+
+func process_cmd( remote_chain []*ss_Component, user_command string ) {
+  fmt.Println("Command entered: "+user_command)
+
+  switch user_command {
+    case "help":
+      fmt.Println( remote_chain[len(remote_chain)-1].devicetype + " commands available:" )
+      fmt.Println( "  help      displays this screen")
+      fmt.Println( "  info      displays device information")
+      fmt.Println( "  status    displays device status information")
+      fmt.Println( "  nodes     lists visible network components")
+ 
+    default:
+      fmt.Println( "Unrecognized command." )
+  }
 
 
 }
