@@ -16,16 +16,18 @@ type ss_Component struct {
   location_x int
   location_y int
 }
-func (node *ss_Component) cmd_info() {
-  fmt.Println("Device ID:",node.ss_id)
-  fmt.Println("     Name:",node.name)
+
+type ss_Event struct {
+  ss_delta_time int64
+  ss_event_function func()
+  ss_event_name string
 }
 
 
 
-
-
-
+func bloop() {
+  fmt.Println(" HELLO!    HELLO!     HELLO!")
+}
 
 
 func main() {
@@ -36,7 +38,23 @@ var (
    user_command		string
 )
 
+type Duration int64
 
+const (
+    Nanosecond  Duration = 1
+    Microsecond          = 1000 * Nanosecond
+    Millisecond          = 1000 * Microsecond
+    Second               = 1000 * Millisecond
+    Minute               = 60 * Second
+    Hour                 = 60 * Minute
+)
+
+//  var events = []ss_Event{
+//      ss_Event {(int64)(8 * Second), (*func())( fmt.Println("Bloooha.") ), "Test 1"},
+//  }
+
+f := func(){ fmt.Println("Ahem. Yes, finally.") }
+time.AfterFunc(8 * time.Second, f )
 
 
   fmt.Println("Welcome to Mission RPLC.\nCopyright (c) 2021 by Katin Imes under the GPL 2.0 License.\n")
@@ -101,6 +119,9 @@ var (
 
 //  fmt.Println( home_base_node )
 
+fmt.Println("Current time in the Metalistic Labs Building is 4:09am Pacific Standard Time.")
+fmt.Println("Value of Second is:",Second)
+
 
 // main game loop
   for {
@@ -128,7 +149,7 @@ func print_prompt( home_base_node *ss_Component, remote_chain []*ss_Component ) 
       fmt.Print( "->"+val.name )
     }
   }
-  fmt.Print( ">" )
+  fmt.Print( "> " )
 }
 
 
@@ -154,11 +175,13 @@ fmt.Println("looking for:",name)
 
 
 func process_cmd( lmr_chain *[]*ss_Component, user_command string, network []*ss_Component ) {
-  fmt.Println("Command entered: "+user_command)
+//  fmt.Println("Command entered: "+user_command)
 
   remote_chain := *lmr_chain
   var current_node = remote_chain[len(remote_chain)-1]
   switch user_command {
+    case "":
+
     case "help":
       fmt.Println( current_node.devicetype + " commands available:" )
       fmt.Println( "  help .................. displays this screen")
@@ -255,7 +278,9 @@ var distance float64
   for idx, val := range network {
     distance = math.Abs((float64)(current_node.location_x - val.location_x)) + math.Abs((float64)(current_node.location_y - val.location_y))
     if distance < 7 && val != current_node {
-      fmt.Println(idx,val.name, val.devicetype)
+      fmt.Println("    "+val.name, "   ["+val.devicetype+"]")
+      if (idx < 0 ) {
+        }
     }
   }
 }
