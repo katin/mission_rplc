@@ -1,6 +1,9 @@
 package main
-import "fmt"
-
+import (
+  "fmt"
+  "math"
+  "time"
+)
 
 // define security system (ss) components
 
@@ -42,47 +45,47 @@ var (
 
   network := []*ss_Component {
 	{"41011","SX81 Camera","910-770423","lab1-north","motion-detected",15,1},
-	{"41012","SX81 Camera","910-770423","lab2-north","idle",19,1},
-	{"41013","SX81 Camera","910-770423","manuf-north","idle",22,1},
-	{"41014","SX81 Camera","910-770423","docks-1","idle",2,1},
-	{"41015","SX81 Camera","910-770423","docks-2","idle",2,11},
-	{"41016","SX81 Camera","910-770423","manuf-east","idle",2,30},
-	{"41017","SX81 Camera","910-770423","lab1-south","motion-detected",3,12},
-	{"41018","SX81 Camera","910-770423","lab2-south","idle",3,16},
-	{"41019","SX81 Camera","910-770423","lab3-north","idle",4,12},
-	{"41020","SX81 Camera","910-770423","lab4-north","idle",4,16},
-	{"41021","SX81 Camera","910-770423","warehouse-east","idle",6,11},
-	{"41022","SX81 Camera","910-770423","warehouse-south","idle",8,5},
-	{"41023","SX81 Camera","910-770423","lab3-south","idle",8,12},
-	{"41024","D9 Door Controller","910-770423","Lab4","auto",8,18},
-	{"41025","SX81 Camera","910-770423","manuf-south-1","idle",8,20},
-	{"41026","SX81 Camera","910-770423","manuf-south-2","idle",8,26},
-	{"41027","SX81 Camera","910-770423","pods-4","idle",9,5},
-	{"41028","SX81 Camera","910-770423","server-room-west","idle",9,15},
-	{"41029","SX81 Camera","910-770423","server-room-north","idle",9,17},
-	{"41030","SX81 Camera","910-770423","server-room-door","idle",9,19},
-	{"41031","D9 Door Controller","910-770423","ServerRoom","auto",9,18},
-	{"41032","SX81 Camera","910-770423","pods-3","idle",9,26},
-	{"41033","SX81 Camera","910-770423","gallery-south","idle",11,16},
-	{"41034","SX81 Camera","910-770423","cafeteria-north","idle",12,8},
-	{"41035","SX81 Camera","910-770423","meeting-meet","idle",12,14},
-	{"41036","SX81 Camera","910-770423","elevators-northwest","idle",12,15},
-	{"41037","SX81 Camera","910-770423","elevators-northeast","idle",12,18},
-	{"41038","SX81 Camera","910-770423","open-collab-north","idle",12,27},
-	{"41039","SX81 Camera","910-770423","cafeteria-east","idle",14,10},
-	{"41040","SX81 Camera","910-770423","open-collab-west","idle",14,23},
-	{"41041","SX81 Camera","910-770423","lobby-main","idle",15,18},
-	{"41042","SX81 Camera","910-770423","pods-1","idle",16,14},
-	{"41042","SX81 Camera","910-770423","entryway","idle",16,18},
-	{"41042","SX81 Camera","910-770423","pods-2","idle",16,19},
-	{"41042","SX81 Camera","910-770423","office-block-west","idle",17,4},
-	{"41042","SX81 Camera","910-770423","office-block-east","idle",17,30},
-	{"41042","SX81 Camera","910-770423","parklot-front-west-corner","idle",19,1},
-	{"41042","SX81 Camera","910-770423","parklot-front-entrance-west","idle",19,14},
-	{"41042","SX81 Camera","910-770423","parklot-front-entrance-east","idle",19,19},
-	{"41042","SX81 Camera","910-770423","parklot-front-east-corner","idle",19,31},
-	{"41042","D9 Door Controller","910-770423","Lab1","auto",3,13},
-	{"41042","D9 Door Controller","910-770423","Lab2","auto",3,16},
+	{"41012","SX81 Camera","910-771811","lab2-north","idle",19,1},
+	{"41013","SX81 Camera","910-768860","manuf-north","idle",22,1},
+	{"41014","SX81 Camera","910-768891","docks-1","idle",2,1},
+	{"41015","SX81 Camera","910-768312","docks-2","idle",2,11},
+	{"41016","SX81 Camera","910-768456","manuf-east","idle",2,30},
+	{"41017","SX81 Camera","910-771998","lab1-south","motion-detected",3,12},
+	{"41018","SX81 Camera","910-771766","lab2-south","idle",3,16},
+	{"41019","SX81 Camera","910-771043","lab3-north","idle",4,12},
+	{"41020","SX81 Camera","910-771228","lab4-north","idle",4,16},
+	{"41021","SX81 Camera","910-771229","warehouse-east","idle",6,11},
+	{"41022","SX81 Camera","910-771230","warehouse-south","idle",8,5},
+	{"41023","SX81 Camera","910-771231","lab3-south","idle",8,12},
+	{"41024","D9 Door Controller","914-32244","Lab4","auto",8,18},
+	{"41025","SX81 Camera","910-770117","manuf-south-1","idle",8,20},
+	{"41026","SX81 Camera","910-770228","manuf-south-2","idle",8,26},
+	{"41027","SX81 Camera","910-770231","pods-4","idle",9,5},
+	{"41028","SX81 Camera","910-770338","server-room-west","idle",9,15},
+	{"41029","SX81 Camera","910-770340","server-room-north","idle",9,17},
+	{"41030","SX81 Camera","910-770342","server-room-door","idle",9,19},
+	{"41031","D9 Door Controller","914-32810","ServerRoom","auto",9,18},
+	{"41032","SX81 Camera","910-770343","pods-3","idle",9,26},
+	{"41033","SX81 Camera","910-773009","gallery-south","idle",11,16},
+	{"41034","SX81 Camera","910-773108","cafeteria-north","idle",12,8},
+	{"41035","SX81 Camera","910-773443","meeting-meet","idle",12,14},
+	{"41036","SX81 Camera","910-773816","elevators-northwest","idle",12,15},
+	{"41037","SX81 Camera","910-773814","elevators-northeast","idle",12,18},
+	{"41038","SX81 Camera","910-773815","open-collab-north","idle",12,27},
+	{"41039","SX81 Camera","910-773826","cafeteria-east","idle",14,10},
+	{"41040","SX81 Camera","910-773827","open-collab-west","idle",14,23},
+	{"41041","SX81 Camera","910-770661","lobby-main","idle",15,18},
+	{"41042","SX81 Camera","910-770663","pods-1","idle",16,14},
+	{"41042","SX81 Camera","910-770665","entryway","idle",16,18},
+	{"41042","SX81 Camera","910-770667","pods-2","idle",16,19},
+	{"41042","SX81 Camera","910-770669","office-block-west","idle",17,4},
+	{"41042","SX81 Camera","910-770671","office-block-east","idle",17,30},
+	{"41042","SX81 Camera","910-770673","parklot-front-west-corner","idle",19,1},
+	{"41042","SX81 Camera","910-770675","parklot-front-entrance-west","idle",19,14},
+	{"41042","SX81 Camera","910-770677","parklot-front-entrance-east","idle",19,19},
+	{"41042","SX81 Camera","910-770679","parklot-front-east-corner","idle",19,31},
+	{"41042","D9 Door Controller","914-31455","Lab1","auto",3,13},
+	{"41042","D9 Door Controller","914-32906","Lab2","auto",3,16},
 	
     }
 
@@ -103,7 +106,7 @@ var (
   for {
     print_prompt( home_base_node, remote_chain )
     fmt.Scanln(&user_command)
-    process_cmd(remote_chain,user_command)
+    process_cmd(&remote_chain, user_command, network)
 
 
 
@@ -118,8 +121,14 @@ var (
 /////////////////////////////////////////////////
 
 func print_prompt( home_base_node *ss_Component, remote_chain []*ss_Component ) {
-  fmt.Print( home_base_node.name + ">" )
-
+  fmt.Print( "(Admin) " + home_base_node.name )
+  for idx, val := range remote_chain {
+//fmt.Println( val )
+    if idx > 0 {
+      fmt.Print( "->"+val.name )
+    }
+  }
+  fmt.Print( ">" )
 }
 
 
@@ -144,16 +153,93 @@ fmt.Println("looking for:",name)
 }
 
 
-func process_cmd( remote_chain []*ss_Component, user_command string ) {
+func process_cmd( lmr_chain *[]*ss_Component, user_command string, network []*ss_Component ) {
   fmt.Println("Command entered: "+user_command)
 
+  remote_chain := *lmr_chain
+  var current_node = remote_chain[len(remote_chain)-1]
   switch user_command {
     case "help":
-      fmt.Println( remote_chain[len(remote_chain)-1].devicetype + " commands available:" )
-      fmt.Println( "  help      displays this screen")
-      fmt.Println( "  info      displays device information")
-      fmt.Println( "  status    displays device status information")
-      fmt.Println( "  nodes     lists visible network components")
+      fmt.Println( current_node.devicetype + " commands available:" )
+      fmt.Println( "  help .................. displays this screen")
+      fmt.Println( "  info .................. displays device information")
+      fmt.Println( "  status ................ displays device status information")
+      fmt.Println( "  nodes ................. lists visible network components")
+      if current_node.devicetype == "SX81 Camera" {
+        fmt.Println( "  connect ............... remotely connect to node via RPLC or WiFi")
+        fmt.Println( "  exit .................. disconnect from a remote node")
+      }
+      if current_node.devicetype == "D9 Door Controller" {
+        fmt.Println( "  setmode ............... set door mode to auto, lock, or unlock")
+      }
+
+     case "info":
+       fmt.Println( "     Device ID:  " + current_node.ss_id )
+       fmt.Println( "   Device Type:  " + current_node.devicetype )
+       fmt.Println( "    Serial No.:  " + current_node.serial_no )
+       fmt.Println( "          Name:  " + current_node.name )
+       fmt.Println( "        Status:  " + current_node.status )
+
+     case "status":
+       fmt.Println( "   WiFi Network:   ***searching...")
+       fmt.Println( "     IP Address:   ***lost connection")
+       fmt.Println( "           RPLC:   active")
+       fmt.Println( "   RPLC Address:   " + current_node.ss_id )
+       fmt.Println( "         Status:   " + current_node.status )
+
+     case "nodes":
+       display_visible_nodes( current_node, network )
+
+     case "connect":
+       var target_name string
+       var distance float64
+       fmt.Print("Enter node name: ")
+       fmt.Scanln(&target_name)
+       var remote_node = get_node_by_name(target_name, network) 
+       if remote_node != nil {
+         distance = math.Abs((float64)(current_node.location_x - remote_node.location_x)) + math.Abs((float64)(current_node.location_y - remote_node.location_y))
+         if distance < 7 {
+           *lmr_chain = append(remote_chain,remote_node)
+           time.Sleep(1)
+           fmt.Println("*** Connection to "+remote_node.name+" successful. ***")
+         }
+       }
+
+     case "exit":
+       if len(*lmr_chain) > 1 {
+         var my_chain = *lmr_chain
+         my_chain = my_chain[:len(my_chain)-1]
+         *lmr_chain = my_chain
+         fmt.Println("--- disconnected --")
+       } else {
+         fmt.Println("Cannot exit. No connection to remote node is active.")
+       }
+
+
+     case "setmode":
+      if current_node.devicetype == "D9 Door Controller" {
+        var network_node *ss_Component
+        var mode string
+ 
+        network_node = get_node_by_name(current_node.name,network)
+
+        fmt.Print("Enter mode [auto, lock, unlock]:")
+        fmt.Scanln(&mode)
+        switch mode {
+          case "auto":
+            network_node.status = "auto"
+
+          case "lock":
+            network_node.status = "locked"
+
+          case "unlock":
+            network_node.status = "unlocked"
+ 
+          default:
+            fmt.Println("Unrecognized mode.")
+        }
+      }
+
  
     default:
       fmt.Println( "Unrecognized command." )
@@ -162,6 +248,17 @@ func process_cmd( remote_chain []*ss_Component, user_command string ) {
 
 }
 
+func display_visible_nodes( current_node *ss_Component, network []*ss_Component ) {
+
+var distance float64
+
+  for idx, val := range network {
+    distance = math.Abs((float64)(current_node.location_x - val.location_x)) + math.Abs((float64)(current_node.location_y - val.location_y))
+    if distance < 7 && val != current_node {
+      fmt.Println(idx,val.name, val.devicetype)
+    }
+  }
+}
 
 
 func mission_instructions() {
