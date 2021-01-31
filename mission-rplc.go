@@ -32,31 +32,43 @@ func main() {
 	{"41021","SX81 Camera","910-770423","warehouse-east","idle",6,11},
 	{"41022","SX81 Camera","910-770423","warehouse-south","idle",8,5},
 	{"41023","SX81 Camera","910-770423","lab3-south","idle",8,12},
-	{"41024","SX81 Camera","910-770423","","idle",2,1},
-	{"41025","SX81 Camera","910-770423","m1","idle",22,1},
-	{"41026","SX81 Camera","910-770423","m1","idle",22,1},
-	{"41027","SX81 Camera","910-770423","m1","idle",22,1},
-	{"41028","SX81 Camera","910-770423","m1","idle",22,1},
-	{"41029","SX81 Camera","910-770423","m1","idle",22,1},
-	{"41030","SX81 Camera","910-770423","m1","idle",22,1},
-	{"41031","SX81 Camera","910-770423","m1","idle",22,1},
-	{"41032","SX81 Camera","910-770423","m1","idle",22,1},
-	{"41033","SX81 Camera","910-770423","m1","idle",22,1},
-	{"41034","SX81 Camera","910-770423","m1","idle",22,1},
-	{"41035","SX81 Camera","910-770423","m1","idle",22,1},
-	{"41036","SX81 Camera","910-770423","manuf-north-1","idle",22,1},
-	{"41037","SX81 Camera","910-770423","manuf-north-1","idle",22,1},
-	{"41038","SX81 Camera","910-770423","manuf-north-1","idle",22,1},
-	{"41039","SX81 Camera","910-770423","manuf-north-1","idle",22,1},
-	{"41040","SX81 Camera","910-770423","manuf-north-1","idle",22,1},
-	{"41041","SX81 Camera","910-770423","manuf-north-1","idle",22,1},
-	{"41042","SX81 Camera","910-770423","manuf-north-1","idle",22,1},
+	{"41024","D9 Door Controller","910-770423","Lab4","auto",8,18},
+	{"41025","SX81 Camera","910-770423","manuf-south-1","idle",8,20},
+	{"41026","SX81 Camera","910-770423","manuf-south-2","idle",8,26},
+	{"41027","SX81 Camera","910-770423","pods-4","idle",9,5},
+	{"41028","SX81 Camera","910-770423","server-room-west","idle",9,15},
+	{"41029","SX81 Camera","910-770423","server-room-north","idle",9,17},
+	{"41030","SX81 Camera","910-770423","server-room-door","idle",9,19},
+	{"41031","D9 Door Controller","910-770423","ServerRoom","auto",9,18},
+	{"41032","SX81 Camera","910-770423","pods-3","idle",9,26},
+	{"41033","SX81 Camera","910-770423","gallery-south","idle",11,16},
+	{"41034","SX81 Camera","910-770423","cafeteria-north","idle",12,8},
+	{"41035","SX81 Camera","910-770423","meeting-meet","idle",12,14},
+	{"41036","SX81 Camera","910-770423","elevators-northwest","idle",12,15},
+	{"41037","SX81 Camera","910-770423","elevators-northeast","idle",12,18},
+	{"41038","SX81 Camera","910-770423","open-collab-north","idle",12,27},
+	{"41039","SX81 Camera","910-770423","cafeteria-east","idle",14,10},
+	{"41040","SX81 Camera","910-770423","open-collab-west","idle",14,23},
+	{"41041","SX81 Camera","910-770423","lobby-main","idle",15,18},
+	{"41042","SX81 Camera","910-770423","pods-1","idle",16,14},
+	{"41042","SX81 Camera","910-770423","entryway","idle",16,18},
+	{"41042","SX81 Camera","910-770423","pods-2","idle",16,19},
+	{"41042","SX81 Camera","910-770423","office-block-west","idle",17,4},
+	{"41042","SX81 Camera","910-770423","office-block-east","idle",17,30},
+	{"41042","SX81 Camera","910-770423","parklot-front-west-corner","idle",19,1},
+	{"41042","SX81 Camera","910-770423","parklot-front-entrance-west","idle",19,14},
+	{"41042","SX81 Camera","910-770423","parklot-front-entrance-east","idle",19,19},
+	{"41042","SX81 Camera","910-770423","parklot-front-east-corner","idle",19,31},
+	{"41042","D9 Door Controller","910-770423","Lab1","auto",3,13},
+	{"41042","D9 Door Controller","910-770423","Lab2","auto",3,16},
+	
 }
+
 
   mission_instructions()
 
 	for idx, val := range network {
-		fmt.Println(idx,val.name)
+		fmt.Println(idx,val.name, val.devicetype)
 	}
 
 
