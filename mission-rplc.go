@@ -155,7 +155,23 @@ const (
       break
     }
   }
-    thief_location = thief_spots[thief_next]
+
+  // remove any motion detection status on the current location
+  current_node := get_node_by_name(thief_location, network)
+  if current_node != nil {
+    if current_node.devicetype == "SX81 Camera" {
+      current_node.status = "idle"
+    }
+  }
+
+  thief_location = thief_spots[thief_next]
+  check_node := get_node_by_name( thief_location, network )
+  if check_node != nil {
+    if check_node.devicetype == "SX81 Camera" {
+      check_node.status = "motion detected"
+    }
+  }
+
 fmt.Println("<TEST> Thief moved to "+thief_location)
 
   time_till_move := min_time + math.Abs( rand.Float64() * variable_time )
