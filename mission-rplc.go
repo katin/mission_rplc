@@ -3,6 +3,7 @@ import (
   "fmt"
   "math"
   "time"
+  "math/rand"
 )
 
 // define security system (ss) components
@@ -23,45 +24,9 @@ type ss_Event struct {
   ss_event_name string
 }
 
+var thief_location string;
 
-
-func bloop() {
-  fmt.Println(" HELLO!    HELLO!     HELLO!")
-}
-
-
-func main() {
-
-var (
-    home_base_node	*ss_Component
-   remote_chain         []*ss_Component
-   user_command		string
-)
-
-type Duration int64
-
-const (
-    Nanosecond  Duration = 1
-    Microsecond          = 1000 * Nanosecond
-    Millisecond          = 1000 * Microsecond
-    Second               = 1000 * Millisecond
-    Minute               = 60 * Second
-    Hour                 = 60 * Minute
-)
-
-//  var events = []ss_Event{
-//      ss_Event {(int64)(8 * Second), (*func())( fmt.Println("Bloooha.") ), "Test 1"},
-//  }
-
-f := func(){ fmt.Println("Ahem. Yes, finally.") }
-time.AfterFunc(8 * time.Second, f )
-
-
-  fmt.Println("Welcome to Mission RPLC.\nCopyright (c) 2021 by Katin Imes under the GPL 2.0 License.\n")
-
-
-
-  network := []*ss_Component {
+  var network = []*ss_Component {
 	{"41011","SX81 Camera","910-770423","lab1-north","motion-detected",15,1},
 	{"41012","SX81 Camera","910-771811","lab2-north","idle",19,1},
 	{"41013","SX81 Camera","910-768860","manuf-north","idle",22,1},
@@ -108,7 +73,24 @@ time.AfterFunc(8 * time.Second, f )
     }
 
 
+func main() {
+
+var (
+   home_base_node	*ss_Component
+   remote_chain         []*ss_Component
+   user_command		string
+)
+
+
+  fmt.Println("Welcome to Mission RPLC.\nCopyright (c) 2021 by Katin Imes under the GPL 2.0 License.\n")
+
+
+  thief_location = "pods-2"
+
   mission_instructions()
+
+  move_thief()
+
 
 //  for idx, val := range network {
 //    fmt.Println(idx,val.name, val.devicetype)
@@ -120,7 +102,7 @@ time.AfterFunc(8 * time.Second, f )
 //  fmt.Println( home_base_node )
 
 fmt.Println("Current time in the Metalistic Labs Building is 4:09am Pacific Standard Time.")
-fmt.Println("Value of Second is:",Second)
+fmt.Println("Value of Second is:",time.Second)
 
 
 // main game loop
@@ -140,6 +122,55 @@ fmt.Println("Value of Second is:",Second)
 /////////////////////////////////////////////////
 // functions
 /////////////////////////////////////////////////
+
+
+// move_thief()
+//
+// Choose randomly from the eight locations the thief will pillage
+// and move the thief to that spot.
+// Then, set a timer (randomized) until his next move.
+
+func move_thief() {
+
+const (
+  min_time	= 30
+  variable_time	= 60
+)
+
+  thief_spots := []string {
+    "lab1-south",
+    "pods-3",
+    "pods-4",
+    "manuf-south-1",
+    "lab2-south",
+    "lab4-south",
+    "lab3-south",
+    "ServerRoom",
+  }    
+
+  var thief_next int
+  for {
+    thief_next= int(math.Abs( rand.Float64() * 8 ))
+    if thief_spots[thief_next] != thief_location {
+      break
+    }
+  }
+    thief_location = thief_spots[thief_next]
+fmt.Println("<TEST> Thief moved to "+thief_location)
+
+  time_till_move := min_time + math.Abs( rand.Float64() * variable_time )
+  timer_seconds := time.Duration(time_till_move) * time.Second
+  f := func() {
+    move_thief()
+  }   
+
+fmt.Println("<TEST> Timer set for",timer_seconds)
+
+  time.AfterFunc( timer_seconds, f)
+
+}
+
+
 
 func print_prompt( home_base_node *ss_Component, remote_chain []*ss_Component ) {
   fmt.Print( "(Admin) " + home_base_node.name )
