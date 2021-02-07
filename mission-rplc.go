@@ -370,7 +370,7 @@ fmt.Println("looking for:",name)
 func score_event( event int64 ) {
   repeat := player_score[event]
   player_score[event] = point_value[event]
-  if repeat = 0 {
+  if repeat == 0 {
     fmt.Println("==================================================================================")
     fmt.Println("ACHIEVEMENT",score_description[event]," --",point_value[event],"points awarded.")
     fmt.Println("==================================================================================")
