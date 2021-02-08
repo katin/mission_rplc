@@ -6,6 +6,7 @@ import (
   "math/rand"
 )
 
+
 // define security system (ss) components
 
 type ss_Component struct {
@@ -74,6 +75,7 @@ var player_score = map[int64]int64 {
   PHOTOGRAPHED_THIEF: 0,
 }
 
+var test_mode = false
 
 
   var network = []*ss_Component {
@@ -96,7 +98,7 @@ var player_score = map[int64]int64 {
 	{"41027","SX81 Camera","910-770231","pods-4","streaming","idle",9,5,""},
 	{"41028","SX81 Camera","910-770338","server-room-west","streaming","idle",9,15,"ServerRoom"},
 	{"41029","SX81 Camera","910-770340","server-room-north","streaming","idle",9,17,"ServerRoom"},
-	{"41030","SX81 Camera","910-770342","server-room-door","streaming","idle",9,19,"ServerRoom"},
+	{"41030","SX81 Camera","910-770342","server-room-east","streaming","idle",9,19,"ServerRoom"},
 	{"41031","D9 Door Controller","914-32810","ServerRoom","","auto",9,18,""},
 	{"41032","SX81 Camera","910-770343","pods-3","streaming","idle",9,26,""},
 	{"41033","SX81 Camera","910-773009","gallery-south","streaming","idle",11,16,""},
@@ -140,7 +142,7 @@ var (
 
   mission_instructions()
 
-  move_thief()
+  move_thief(thief_location)
 
 
 //  for idx, val := range network {
@@ -152,9 +154,7 @@ var (
 
 //  fmt.Println( home_base_node )
 
-fmt.Println("Current time in the Metalistic Labs Building is 4:09am Pacific Standard Time.")
-fmt.Println("Value of Second is:",time.Second)
-
+  fmt.Println("Current time in the Metalistic Labs Building is 4:09am Pacific Standard Time.")
 
 // main game loop
   for {
@@ -245,11 +245,18 @@ func thief_lockedin( check_node *ss_Component ) bool {
 
 // move_thief()
 //
+// Parms: supply location string to move thier there, or
+//        empty string picks a random location of interest
+//
 // Choose randomly from the eight locations the thief will pillage
 // and move the thief to that spot.
 // Then, set a timer (randomized) until his next move.
+// Returns true if successful, false if move failed.
+//   Moves can fail if:
+//    - doors are locked
+//    - invalid location name is given
 
-func move_thief() {
+func move_thief( destination string ) bool {
 
   thief_spots := []string {
     // these must be matching, valid names of SX81 cameras in the network
@@ -267,11 +274,11 @@ func move_thief() {
 
   // check to see if we are locked in and can't move
   if thief_lockedin(current_node) {
-fmt.Println("<TEST> Thief can't move! Door is locked!")
+    test_msg("Thief can't move! Door is locked!")
     // just to be all-logic-possible safe, log the locked in event
     score_event(LOCKED_IN_THIEF)
     set_move_timer()
-    return
+    return true
   }
 
   var thief_next int
@@ -303,10 +310,32 @@ fmt.Println("<TEST> Thief can't move! Door is locked!")
     }
   }
 
-fmt.Println("<TEST> Thief moved to "+thief_location)
+  test_msg("Thief moved to "+thief_location)
 
   set_move_timer()
+  return true
+}
 
+
+func put_thief( location string ) bool {
+
+  check_node := get_node_by_name( location, network )
+  if check_node != nil {
+    thief_location = location 
+    if check_node.devicetype == "SX81 Camera" {
+      check_node.status = "motion detected"
+      if check_node.mode == "motdet-photo" || check_node.mode == "5sec-photo" {
+        score_event( PHOTOGRAPHED_THIEF )
+      }
+    }
+  } else {
+    display_error("put_thief() given invalid location '"+location+"'. Move failed.")
+    return false
+  }
+
+  test_msg("Thief moved to "+thief_location)
+
+  return true
 }
 
 
@@ -320,10 +349,11 @@ const (
   time_till_move := min_time + math.Abs( rand.Float64() * variable_time )
   timer_seconds := time.Duration(time_till_move) * time.Second
   f := func() {
-    move_thief()
+    move_thief("")
   }   
 
-fmt.Println("<TEST> Timer set for",timer_seconds)
+  psecs := fmt.Sprint(timer_seconds)
+  test_msg("Timer set for "+psecs)
 
   time.AfterFunc( timer_seconds, f)
 
@@ -350,14 +380,12 @@ func display_error( msg string ) {
 
 func get_node_by_name( name string, network []*ss_Component ) *ss_Component {
 
-fmt.Println("looking for:",name)
+  test_msg("looking for "+name)
 
   for idx, val := range network {
     if val.name == name { 
-//      fmt.Println("FOUND IT",idx)
       return network[idx] 
     } 
-//fmt.Println(idx,val.name, val.devicetype)
   }
   display_error( "node name '"+name+"' not found in network." )
   return nil
@@ -429,7 +457,7 @@ func process_cmd( lmr_chain *[]*ss_Component, user_command string, network []*ss
        fmt.Println( "Your Current Score: " )
        var total int64 = 0
        for x := range player_score {
-         fmt.Println( "    "+prefix_pad_string(score_description[x]+":",55), player_score[x] )
+         fmt.Println( "    "+prefix_pad_string(score_description[x]+":",55), player_score[x], "/", point_value[x] )
          total = total + player_score[x]
        }
        fmt.Println("  Total score:", total, "points")
@@ -453,8 +481,16 @@ func process_cmd( lmr_chain *[]*ss_Component, user_command string, network []*ss
            *lmr_chain = append(remote_chain,remote_node)
            time.Sleep(1)
            fmt.Println("*** Connection to "+remote_node.name+" successful. ***")
+           score_event( REMOTE_CONNECTION )
+           if len(remote_node.name) > 12 {
+             svroom := remote_node.name[0:11]
+fmt.Println("svroom: "+svroom)
+             if svroom == "server-room" {
+               score_event( SERVER_ROOM )
+             }
+           }
 	   if len(*lmr_chain) > 5 {
-             score_event(FIVE_PIVOTS_CHAIN)
+             score_event( FIVE_PIVOTS_CHAIN )
            }
          }
        }
@@ -486,6 +522,7 @@ func process_cmd( lmr_chain *[]*ss_Component, user_command string, network []*ss
 
             case "lock":
               network_node.status = "locked"
+              score_event( DOOR_CONTROLS )
               if thief_in_zone( network_node ) {
                 score_event( LOCKED_IN_THIEF )
               }
@@ -517,9 +554,17 @@ func process_cmd( lmr_chain *[]*ss_Component, user_command string, network []*ss
 
             case "5sec-photo":
               network_node.mode = "5sec-photo"
+              score_event( PHOTOMODE_CAMERA )
+              if network_node.status == "motion detected" {
+                score_event( PHOTOGRAPHED_THIEF )
+              }
  
             case "motdet-photo":
               network_node.mode = "motdet-photo"
+              score_event( PHOTOMODE_CAMERA )
+              if network_node.status == "motion detected" {
+                score_event( PHOTOGRAPHED_THIEF )
+              }
 
             default:
               fmt.Println("Unrecognized mode.")
@@ -547,13 +592,21 @@ func thief_in_zone ( doornode *ss_Component ) bool {
   for i, node := range network {
     if node.doorzone == doornode.name {
       if node.status == "motion detected" {
-fmt.Println("<TEST> THIEF IN ZONE!")
+        test_msg("THIEF IN ZONE!")
         _=i
         return true
       }
     }
   }
   return false
+}
+
+
+func test_msg( msg string ) {
+  if !test_mode {
+    return
+  }
+  fmt.Println("<TEST>",msg)
 }
 
 
