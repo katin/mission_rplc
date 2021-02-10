@@ -4,6 +4,7 @@ import (
   "math"
   "time"
   "math/rand"
+  "os"
 )
 
 
@@ -125,12 +126,12 @@ var test_mode = false
 	
     }
 
+var remote_chain         []*ss_Component
 
 func main() {
 
 var (
    home_base_node	*ss_Component
-   remote_chain         []*ss_Component
    user_command		string
 )
 
@@ -161,6 +162,7 @@ var (
     print_prompt( home_base_node, remote_chain )
     fmt.Scanln(&user_command)
     process_cmd(&remote_chain, user_command, network)
+    user_command = ""
 
     // check for win condition
     undone := false
@@ -176,10 +178,11 @@ var (
       fmt.Println("=========================================================================")
       fmt.Println("     You have won! The thief has been locked in and photographed!        ")
       fmt.Println("=========================================================================")
-      fmt.Println("    The police arrive and aarrest the thief.  Well done!")
+      fmt.Println("    The police arrive and arrest the thief.  Well done!")
       fmt.Println("=========================================================================")
       fmt.Println("=========================================================================")
       fmt.Println("=========================================================================")
+      display_score()
       break;
     }
 
@@ -307,6 +310,13 @@ func move_thief( destination string ) bool {
   if check_node != nil {
     if check_node.devicetype == "SX81 Camera" {
       check_node.status = "motion detected"
+      if check_node.mode == "5sec-photo" || check_node.mode == "motdet-photo" {
+        fmt.Println("\n\n   >>> RPLC network transport message: motion detected on camera '"+check_node.name+"'\n\n")
+      }
+      if check_node.mode == "motdet-photo" || check_node.mode == "5sec-photo" {
+        score_event( PHOTOGRAPHED_THIEF )
+        fmt.Println("\n\n   >>> RPLC network transport message: photo taken on camera '"+check_node.name+"'\n\n")
+      }
     }
   }
 
@@ -405,6 +415,17 @@ func score_event( event int64 ) {
   }
 }
 
+func display_score() {
+  fmt.Println( "Your Current Score: " )
+  var total int64 = 0
+  for x := range player_score {
+    fmt.Println( "    "+prefix_pad_string(score_description[x]+":",55), player_score[x], "/", point_value[x] )
+    total = total + player_score[x]
+  }
+  fmt.Println("  Total score:", total, "points")
+}
+
+
 func process_cmd( lmr_chain *[]*ss_Component, user_command string, network []*ss_Component ) {
 //  fmt.Println("Command entered: "+user_command)
 
@@ -412,6 +433,18 @@ func process_cmd( lmr_chain *[]*ss_Component, user_command string, network []*ss
   var current_node = remote_chain[len(remote_chain)-1]
   switch user_command {
     case "":
+
+    case "quit":
+      var answer string
+      fmt.Print("Are you sure you want to exit? (Y/N)")
+      fmt.Scan(&answer)
+      if answer[0:1] == "Y" || answer[0:1] == "y" {
+        fmt.Println("\n\nThanks for playing! Bye!\n")
+        os.Exit(0)
+      }
+
+    case "mission":
+      mission_instructions()
 
     case "help":
       fmt.Println( current_node.devicetype + " commands available:" )
@@ -454,20 +487,14 @@ func process_cmd( lmr_chain *[]*ss_Component, user_command string, network []*ss
 
 
      case "score":
-       fmt.Println( "Your Current Score: " )
-       var total int64 = 0
-       for x := range player_score {
-         fmt.Println( "    "+prefix_pad_string(score_description[x]+":",55), player_score[x], "/", point_value[x] )
-         total = total + player_score[x]
-       }
-       fmt.Println("  Total score:", total, "points")
+      display_score()
 
      case "nodes":
        display_visible_nodes( current_node, network )
 
      case "connect":
        if current_node.devicetype == "D9 Door Controller" {
-          fmt.Println("Unrecognized command.")
+          fmt.Println("Unrecognized command. Type 'exit' to drop a connection.")
           break
        }
        var target_name string
@@ -574,7 +601,7 @@ fmt.Println("svroom: "+svroom)
 
  
     default:
-      fmt.Println( "Unrecognized command." )
+      fmt.Println( "Unrecognized command. Type 'exit' to drop a connection." )
   }
 
 
@@ -644,7 +671,7 @@ var distance float64
   for idx, val := range network {
     distance = math.Abs((float64)(current_node.location_x - val.location_x)) + math.Abs((float64)(current_node.location_y - val.location_y))
     if distance < 7 && val != current_node {
-      fmt.Println("    "+val.name, "   ["+val.devicetype+"]")
+      fmt.Println("   [",prefix_pad_string(val.devicetype,20),"]",val.name )
       if (idx < 0 ) {
         }
     }
@@ -653,15 +680,24 @@ var distance float64
 
 
 func mission_instructions() {
-  fmt.Println("==== Instructions ====\nYour mission, should you choose to accept it, is to use an internal security system of cameras, sensors, and door locking controls to locate, photograph, and trap a thief that has broken into Metalistic Labs, Inc.\n")
+
+var pinput string
+
+  fmt.Println("==== Instructions ====\nYour mission, should you choose to accept it, is to use an internal security system of cameras, sensors, and door locking controls to locate, photograph, and trap a thief that has broken into the Metalistic Labs, Inc. corporate headquarters building.\n")
 
   fmt.Println("You have access to a terminal that is connected to a security system camera in the lobby of the building. The problem is, the thief apparently knew that the security system components communicated via WiFi, and he has disabled all WiFi signals in the building by hacking the WiFi access points.\n")
 
-  fmt.Println("This means the security system is mostly non-functional, and cannot be commanded and controlled from the central security center nor by the security system company. Video feeds currently cannot leave the building. Luckily, the security system components do have a legacy communications system still embedded called RPLC. This allows slower communications between components over the A/C power wiring of the building. However, this method only works to a maximum distance of about 100', and the Metalistic Labs building is 600' long by 350' wide. It is a single story building.\n")
+  fmt.Println("This means the security system is mostly non-functional, and cannot be commanded and controlled from the central security center nor by the security system company. Video feeds currently cannot leave the building, and video streaming from cameras currently doesn't work. \n\nLuckily, the security system components do have a legacy communications system still embedded called RPLC. This allows slower communications between components over the A/C power wiring of the building. However, this method only works to a maximum distance of about 100', and the Metalistic Labs building is 600' long by 350' wide. It is a single story building.\n")
 
-  fmt.Println("Finally, you do not have a map of the building or of the security components. We believe the thief will be trying to steal prototype devices from offices and the four labs, as well as trying to break into the main server room to download data or compromise the servers there. All the lhe labs and the server room have electronically lockable doors and no windows, and so if you can communicate with the door lock controllers and command them to 'maglock' while the thief is inside, he will be locked in. This is your goal. The offices do not have such door locks, and thus can't be used to trap the thief.\n")
+  fmt.Print("\n>>> press enter to continue")
+  fmt.Scanln(&pinput)
 
-  fmt.Println("It's 4am, so no one else is in the building. There are no known pets or active robots in the building, either, so any motion detected by security system cameras or motion detectors should be the thief.\n\nUseful commands include 'help', 'info', and 'status'. Different components of the security system have different functions and commands, so you'll probably want to try the 'help' command on each different component to see what commands they support. You can also type 'mission' to see these instructions, and 'goal' to get a status of your progress. Good luck!\n") 
+  fmt.Println("\nFinally, you do not have a map of the building or of the security components. We believe the thief will be trying to steal prototype devices from offices and the four labs, as well as trying to break into the main server room to download data or compromise the servers there. All the lhe labs and the server room have electronically lockable doors and no windows, and so if you can communicate with the door lock controllers and command them to 'lock' while the thief is inside, he will be locked in until the police arrive. This is your goal. The offices do not have such door locks, and thus can't be used to trap the thief.\n")
+
+  fmt.Print("\n>>> press enter to continue")
+  fmt.Scanln(&pinput)
+
+  fmt.Println("\nIt's 4am, so no one else is in the building. There are no known pets or active robots in the building, either, so any motion detected by security system cameras or motion detectors should be the thief.\n\nUseful commands include 'help', 'info', and 'status'. Different components of the security system have different functions and commands, so you'll probably want to try the 'help' command on each different component to see what commands they support. You can also type 'mission' to see these instructions, and 'score' to get a status of your progress. 'quit' or CTRL-C will quit the game. \n\nGood luck!\n") 
 
 
 }
