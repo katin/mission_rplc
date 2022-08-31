@@ -157,6 +157,14 @@ var (
 
   fmt.Println("Current time in the Metalistic Labs Building is 4:09am Pacific Standard Time.")
 
+  fmt.Print("\nConnecting to camera as administrator")
+  for x:=1; x<7; x++ {
+    time.Sleep( 430 * time.Millisecond )
+    fmt.Print(".")
+  }
+  fmt.Println("Connected.\n")
+
+ 
 // main game loop
   for {
     print_prompt( home_base_node, remote_chain )
@@ -511,7 +519,6 @@ func process_cmd( lmr_chain *[]*ss_Component, user_command string, network []*ss
            score_event( REMOTE_CONNECTION )
            if len(remote_node.name) > 12 {
              svroom := remote_node.name[0:11]
-fmt.Println("svroom: "+svroom)
              if svroom == "server-room" {
                score_event( SERVER_ROOM )
              }
