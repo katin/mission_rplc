@@ -15,4 +15,4 @@ No cybersecurity knowledge required! Explore, examine, investigate, experiment, 
 see if you can use the system to capture the thief!
 
 Good luck!
-(Candidates will want to scren-capture their final score screen to share with their interviewers.)
+(Candidates will want to screen-capture their final score screen to share with their interviewers, as there is no central-reporting or Internet communications in this app.)
